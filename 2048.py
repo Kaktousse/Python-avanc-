@@ -4,219 +4,276 @@ import random
 import time
 
 def Refresh(grid : list[list[str]]):
-    print("\n"*100)
+    #print("\n"*100)
     Drawgrid(grid)
+    #print("\n"*3)
 
 def Creategrid(lenght:int) -> list[list[str]]:
     grid = []
     for lign in range(lenght):
         new_lign = []
         for column in range(lenght):
-            new_lign.append(" ")
+            new_lign.append(0)
         grid.append(new_lign)
     return grid
 
 
 def Drawgrid(grid: list[list[str]]):
+    printed_grid = []
     for lign in range(len(grid)):
+        newlign = []
         for tile in range(len(grid)): 
-            if grid[lign][tile] != " ":
-                grid[lign][tile] = str(grid[lign][tile])
+            if grid[lign][tile] != 0:
+                newlign.append(str(grid[lign][tile]))
+            elif grid[lign][tile] == 0:
+                newlign.append(" ")
+        printed_grid.append(newlign)
 
-    word_length =  len(grid[0])
-    print("\t","-"*(4*word_length))
-    count :int = 1
-    for ligne in grid:
-        separator = " | "
+    print("\t","-"*(64))
+    for ligne in printed_grid:
+        separator = " \t|\t "
         L = separator.join(ligne)
-        print("\t |",L,"|")
-        print("\t", "-"*(4*word_length))
+        print("\t |\t",L,"\t|")
+        print("\t", "-"*(64))
 
-    for lign in grid:
-        for tile in lign: 
-            if tile.isdigit():
-                tile = int(tile)
+
+
+
 
 def Game(grid: list[list[str]]):
-    grid = Addnum(grid)
+    grid = Addnum(grid,GetAvailableTiles(grid))
     Refresh(grid)
     pressed = False
-    while True:
+    ending = False
+    while ending == False:
         if keyboard.is_pressed("left arrow"):
             time.sleep(0.1)
-            direction = 'left'
+            direction = "left"
             pressed = True      
         elif keyboard.is_pressed("right arrow"):
             time.sleep(0.1)
-            direction ='right'
+            direction ="right"
             pressed = True
         elif keyboard.is_pressed("up arrow"):
             time.sleep(0.1)
-            direction ='up'
+            direction ="up"
             pressed = True
         elif keyboard.is_pressed("down arrow"):
             time.sleep(0.1)
-            direction ='down'
+            direction ="down"
             pressed = True
         if pressed == True:
             grid = Moving(direction,grid)
-            grid = Addnum(grid)
+            empty_tiles = GetAvailableTiles(grid)
+            if len(empty_tiles) > 0:
+                grid = Addnum(grid,empty_tiles)
             Refresh(grid)
-            pressed = False    
+            pressed = False
+            if CheckEnding(grid,'Win'):
+                print("Well done, you won !")
+                break
+            if CheckEnding(grid,'Loose'):
+                print("You loose, better luck next time !")
+                break
 
+            
+
+
+def CheckEnding(grid,win_or_loose):
+    if win_or_loose == 'Loose':
+        if len(GetAvailableTiles(grid)) == 0:
+            if Checkmerge(grid) == True:
+                return False
+            return True
+        return False
+    if win_or_loose == 'Win':
+        for lign in grid:
+            for column in lign:
+                if column == 2048:
+                    return True
+        return False
 
 def GetAvailableTiles(grid : list[list[str]]) -> list[tuple[int, int]]:
     Availabletiles :list  = []
 
     for lign in range(len(grid)) : 
         for column in range(len(grid)) : 
-            if grid[lign][column] == " ":
+            if grid[lign][column] == 0:
                 Availabletiles.append([lign,column])
     return Availabletiles
 
-def Addnum(grid:list[list[str]]) -> list[list[str]]:
-    availabletiles = GetAvailableTiles(grid)
-    for i in range(2):
-        randomindex = random.randint(0,len(availabletiles)-1)
-        randomtile = availabletiles[randomindex]
-        grid[randomtile[0]][randomtile[1]] = random.choice([2,4])
-        availabletiles.pop(randomindex)
+def Addnum(grid:list[list[str]],empty_tiles: int) -> list[list[str]]:
+    if len(empty_tiles) > 1:
+        count = 2
+    else: 
+        count = 1
+    for i in range(count):
+        randomindex = random.randint(0,len(empty_tiles)-1)
+        randomtile = empty_tiles[randomindex]
+        grid[randomtile[0]][randomtile[1]] = int(random.choice([2,4]))
+        empty_tiles.pop(randomindex)
     return grid
     
 
-def Checkmerge(direction:str ,grid:list[list[str]],wheremerge: tuple[int,int], tiletomerge: int) -> tuple[int,int]:
-    # check lign #
-    merge = ['none','none']
-    if wheremerge[0] != -1:
-        lign = wheremerge[0]
-        if direction == 'left':
-            for tile in range(tiletomerge):
-                if grid[lign][tile] == grid[lign][tiletomerge]:
-                    merge = [lign,tile]
-                if grid[lign][tile] != grid[lign][tiletomerge] and grid[lign][tile] != " ":
-                    merge = ['none','none']
+def Checkmerge(grid:list[list[str]]) -> tuple[int,int]:
 
-        if direction == 'right':
-            for tile in range(len(grid)-1,tiletomerge,-1):
-                if grid[lign][tile] == grid[lign][tiletomerge]:
-                    merge = [lign,tile]
-                if grid[lign][tile] != grid[lign][tiletomerge] and grid[lign][tile] != " ":
-                    merge = ['none','none']
-        
-    # check column #
-    elif wheremerge[1] != -1:
-        column = wheremerge[1]
-        if direction == 'up':
-            for tile in range(tiletomerge):
-                if grid[tile][column] == grid[tiletomerge][column]:
-                    merge = [tile,column]
-                if grid[tile][column] != grid[tiletomerge][column] and grid[tile][column] != " ":
-                    merge = ['none','none']
+    for lign in range(4):
+        for column in range(4):
+            if grid[lign][column] != 0:
+                merge = ["none","none"]
+                for search in range(column):
+                    if grid[lign][column] == grid[lign][search]:
+                        merge = [lign,search]
+                    elif grid[lign][search] == 0 and merge == ["none","none"]:
+                        merge = [lign,search]
+                    elif grid[lign][column] != grid[lign][search] and grid[lign][search] != 0:
+                        merge = ["none","none"]
+                if merge != ["none","none"]:
+                    return True
 
-        if direction == 'down':
-            for tile in range(len(grid)-1,tiletomerge,-1):
-                if grid[tile][column] == grid[tiletomerge][column]:
-                    merge = [tile,column]
-                if grid[tile][column] != grid[tiletomerge][column] and grid[tile][column] != " ":
-                    merge = ['none','none']
+    for lign in range(4):
+        for column in range(3,-1,-1):
+            if grid[lign][column] != 0:
+                merge = ["none","none"]
+                for search in range(3,column,-1):
+                    if grid[lign][column] == grid[lign][search]:
+                        merge = [lign,search]
+                    elif grid[lign][search] == 0 and merge == ["none","none"]:
+                        merge = [lign,search]
+                    elif grid[lign][column] != grid[lign][search] and grid[lign][search] != 0:
+                            merge = ["none","none"]
+                if merge != ["none","none"]:
+                    return True
+            
+    for column in range(4):
+        for lign in range(4):
+            if grid[lign][column] != 0:
+                merge = ["none","none"]
+                for search in range(lign):
+                    if grid[lign][column] == grid[search][column]:
+                        merge = [search,column]
+                    elif grid[search][column] == 0 and merge == ["none","none"]:
+                        merge = [search,column]
+                    elif grid[lign][column] != grid[search][column] and grid[search][column] != 0:
+                        merge = ["none","none"]
+                if merge != ["none","none"]:
+                    return True
+
+    for column in range(4):
+        for lign in range(3,-1,-1):
+            if grid[lign][column] != 0:
+                merge = ["none","none"]
+                for search in range(3,lign,-1):
+                    if grid[lign][column] == grid[search][column]:
+                        merge = [search,column]
+                    elif grid[search][column] == 0 and merge == ["none","none"]:
+                        merge = [search,column]
+                    elif grid[lign][column] != grid[search][column] and grid[search][column] != 0:
+                        merge = ["none","none"]
+                if merge != ["none","none"]:
+                    return True
     
-    return merge
-
-def Checkempty(direction:str, grid:list[list[str]],wherecheck : tuple[int,int],tiletocheck: int) -> tuple[int,int]:
-    check = ['none','none']
-
-    if wherecheck[0] != -1:
-        lign = wherecheck[0]
-        if direction == 'left':
-            for tile in range(tiletocheck):
-                if grid[lign][tile] == " " and check == ['none','none']:
-                    check = [lign,tile]
-                if grid[lign][tile] != " ":
-                    check = ['none','none']
-
-        if direction == 'right':
-            for tile in range(len(grid)-1,tiletocheck,-1):
-                if grid[lign][tile] == " " and check == ['none','none']:
-                    check = [lign,tile]
-                if grid[lign][tile] != " ":
-                    check = ['none','none']
-
-        
-
-    elif wherecheck[1] != -1:
-        column = wherecheck[1]
-        if direction == 'up':
-            for tile in range(tiletocheck):
-                if grid[tile][column] == " " and check == ['none','none']:
-                    check = [tile,column]
-                if grid[tile][column] != " ":
-                    check = ['none','none']
-
-        if direction == 'down':
-            for tile in range(len(grid)-1,tiletocheck,-1):
-                if grid[tile][column] == " " and check == ['none','none']:
-                    check = [tile,column]
-                if grid[tile][column] != " ":
-                    check = ['none','none']
-    return check
+    return False
 
 
 def  Moving(axis: str,grid: list[list[str]]) -> list[list[str]]:
+    alreadymerge = []
+    if axis == "left":
+        for lign in range(4):
+            for column in range(4):
+                if grid[lign][column] != 0:
+                    merge = ["none","none"]
+                    for search in range(column):
+                        if grid[lign][column] == grid[lign][search] and [lign,search] not in alreadymerge:
+                            merge = [lign,search]
+                        elif grid[lign][search] == 0 and merge == ["none","none"]:
+                            merge = [lign,search]
+                        elif grid[lign][column] != grid[lign][search] and grid[lign][search] != 0:
+                            merge = ["none","none"]
+                    if merge != ["none","none"]:
+                        if grid[merge[0]][merge[1]] != 0:
+                            alreadymerge.append(merge)
+                        grid[merge[0]][merge[1]] = grid[merge[0]][merge[1]] + grid[lign][column]
+                        grid[lign][column] = 0
 
-    if axis == "right":
-        for lign in range(len(grid)):
-            for column in range(len(grid)-1,-1,-1):
-                if grid[lign][column] != " ":
-                    merge = Checkmerge("right",grid,[lign,-1],column)
-                    place = Checkempty("right",grid,[lign,-1],column)
-                    if merge != ['none','none']:
-                        grid[merge[0]][merge[1]] = int(grid[lign][column]) + int(grid[lign][column])
-                        grid[lign][column] = " "
-                    elif place != ['none','none']:
-                        grid[place[0]][place[1]] = grid[lign][column]
-                        grid[lign][column] = " "
-                          
-    elif axis == "left":
- 
-        for lign in range(len(grid)):
-            for column in range(len(grid)):
-                if grid[lign][column] != " ":
-                    merge = Checkmerge("left",grid,[lign,-1],column)
-                    place = Checkempty("left",grid,[lign,-1],column)
-                    if merge != ['none','none']:
-                        grid[merge[0]][merge[1]] = int(grid[lign][column]) + int(grid[lign][column])
-                        grid[lign][column] = " "
-                    elif place != ['none','none']:
-                        grid[place[0]][place[1]] = grid[lign][column]
-                        grid[lign][column] = " "
 
+    elif axis == "right":
+         for lign in range(4):
+            for column in range(3,-1,-1):
+                if grid[lign][column] != 0:
+                    merge = ["none","none"]
+                    for search in range(3,column,-1):
+                        if grid[lign][column] == grid[lign][search] and [lign,search] not in alreadymerge:
+                            merge = [lign,search]
+                        elif grid[lign][search] == 0 and merge == ["none","none"]:
+                            merge = [lign,search]
+                        elif grid[lign][column] != grid[lign][search] and grid[lign][search] != 0:
+                            merge = ["none","none"]
+                    if merge != ["none","none"]:
+                        if grid[merge[0]][merge[1]] != 0:
+                            alreadymerge.append(merge)
+                        grid[merge[0]][merge[1]] = grid[merge[0]][merge[1]] + grid[lign][column]
+                        grid[lign][column] = 0
+
+    
     elif axis == "up":
-        for column in range(len(grid)):
-            for lign in range(len(grid)):
-                if grid[lign][column] != " ":
-                    merge = Checkmerge("up",grid,[-1,column],lign)
-                    place = Checkempty("up",grid,[-1,column],lign)
-                    if merge != ['none','none']:
-                        grid[merge[0]][merge[1]] = int(grid[lign][column]) + int(grid[lign][column])
-                        grid[lign][column] = " "
-                    elif place != ['none','none']:
-                        grid[place[0]][place[1]] = grid[lign][column]
-                        grid[lign][column] = " "
-                                
-    elif axis == "down":            
-        for column in range(len(grid)):
-            for lign in range(len(grid)-1,-1,-1):
-                if grid[lign][column] != " ":
-                    merge = Checkmerge("down",grid,[-1,column],lign)
-                    place = Checkempty("down",grid,[-1,column],lign)
-                    if merge != ['none','none']:
-                        grid[merge[0]][merge[1]] = int(grid[lign][column]) + int(grid[lign][column])
-                        grid[lign][column] = " "
-                    elif place != ['none','none']:
-                        grid[place[0]][place[1]] = grid[lign][column]
-                        grid[lign][column] = " "
+        for column in range(4):
+            for lign in range(4):
+                if grid[lign][column] != 0:
+                    merge = ["none","none"]
+                    for search in range(lign):
+                        if grid[lign][column] == grid[search][column] and [search,column] not in alreadymerge:
+                            merge = [search,column]
+                        elif grid[search][column] == 0 and merge == ["none","none"]:
+                            merge = [search,column]
+                        elif grid[lign][column] != grid[search][column] and grid[search][column] != 0:
+                            merge = ["none","none"]
+                    if merge != ["none","none"]:
+                        if grid[merge[0]][merge[1]] != 0:
+                            alreadymerge.append(merge)
+                        grid[merge[0]][merge[1]] = grid[merge[0]][merge[1]] + grid[lign][column]
+                        grid[lign][column] = 0
+
+
+    elif axis == "down":    
+        for column in range(4):
+            for lign in range(3,-1,-1):
+                if grid[lign][column] != 0:
+                    merge = ["none","none"]
+                    for search in range(3,lign,-1):
+                        if grid[lign][column] == grid[search][column] and [search,column] not in alreadymerge:
+                            merge = [search,column]
+                        elif grid[search][column] == 0 and merge == ["none","none"]:
+                            merge = [search,column]
+                        elif grid[lign][column] != grid[search][column] and grid[search][column] != 0:
+                            merge = ["none","none"]
+                    if merge != ["none","none"]:
+                        if grid[merge[0]][merge[1]] != 0:
+                            alreadymerge.append(merge)  
+                        grid[merge[0]][merge[1]] = grid[merge[0]][merge[1]] + grid[lign][column]
+                        grid[lign][column] = 0
+                          
 
     return grid
 
+def Try_again(T:str) -> bool:
+    return T != "N"
 
-Game(Creategrid(4))
+def Ask_str(sPossibilities: list) -> str:
+    while True:
+        print("Please enter ", sPossibilities,")")
+        given_input:str = input(": ")   
+        for element in sPossibilities:
+            if element == given_input:
+                return given_input
+
+def Start(start : bool):
+    while start:
+        grid = Creategrid(4)
+        Game(grid)
+        print("\n Do you want to retry ?")
+        retry:str = Ask_str(["Y","N"])
+        start: bool = Try_again(retry)
+    print("Game Over")
+
+Start(True)
