@@ -182,15 +182,15 @@ def  Moving(axis: str,grid: list[list[str]]) -> list[list[str]]:
         for lign in range(4):
             for column in range(4):
                 if grid[lign][column] != 0:
-                    merge = ["none","none"]
+                    merge = [-1,-1]
                     for search in range(column):
                         if grid[lign][column] == grid[lign][search] and [lign,search] not in alreadymerge:
                             merge = [lign,search]
-                        elif grid[lign][search] == 0 and merge == ["none","none"]:
+                        elif grid[lign][search] == 0 and merge == [-1,-1]:
                             merge = [lign,search]
                         elif grid[lign][column] != grid[lign][search] and grid[lign][search] != 0:
-                            merge = ["none","none"]
-                    if merge != ["none","none"]:
+                            merge = [-1,-1]
+                    if merge != [-1,-1]:
                         if grid[merge[0]][merge[1]] != 0:
                             alreadymerge.append(merge)
                         grid[merge[0]][merge[1]] = grid[merge[0]][merge[1]] + grid[lign][column]
@@ -201,15 +201,15 @@ def  Moving(axis: str,grid: list[list[str]]) -> list[list[str]]:
          for lign in range(4):
             for column in range(3,-1,-1):
                 if grid[lign][column] != 0:
-                    merge = ["none","none"]
+                    merge = [-1,-1]
                     for search in range(3,column,-1):
                         if grid[lign][column] == grid[lign][search] and [lign,search] not in alreadymerge:
                             merge = [lign,search]
-                        elif grid[lign][search] == 0 and merge == ["none","none"]:
+                        elif grid[lign][search] == 0 and merge == [-1,-1]:
                             merge = [lign,search]
                         elif grid[lign][column] != grid[lign][search] and grid[lign][search] != 0:
-                            merge = ["none","none"]
-                    if merge != ["none","none"]:
+                            merge = [-1,-1]
+                    if merge != [-1,-1]:
                         if grid[merge[0]][merge[1]] != 0:
                             alreadymerge.append(merge)
                         grid[merge[0]][merge[1]] = grid[merge[0]][merge[1]] + grid[lign][column]
@@ -220,15 +220,15 @@ def  Moving(axis: str,grid: list[list[str]]) -> list[list[str]]:
         for column in range(4):
             for lign in range(4):
                 if grid[lign][column] != 0:
-                    merge = ["none","none"]
+                    merge = [-1,-1]
                     for search in range(lign):
                         if grid[lign][column] == grid[search][column] and [search,column] not in alreadymerge:
                             merge = [search,column]
-                        elif grid[search][column] == 0 and merge == ["none","none"]:
+                        elif grid[search][column] == 0 and merge == [-1,-1]:
                             merge = [search,column]
                         elif grid[lign][column] != grid[search][column] and grid[search][column] != 0:
-                            merge = ["none","none"]
-                    if merge != ["none","none"]:
+                            merge = [-1,-1]
+                    if merge != [-1,-1]:
                         if grid[merge[0]][merge[1]] != 0:
                             alreadymerge.append(merge)
                         grid[merge[0]][merge[1]] = grid[merge[0]][merge[1]] + grid[lign][column]
@@ -239,15 +239,15 @@ def  Moving(axis: str,grid: list[list[str]]) -> list[list[str]]:
         for column in range(4):
             for lign in range(3,-1,-1):
                 if grid[lign][column] != 0:
-                    merge = ["none","none"]
+                    merge = [-1,-1]
                     for search in range(3,lign,-1):
                         if grid[lign][column] == grid[search][column] and [search,column] not in alreadymerge:
                             merge = [search,column]
-                        elif grid[search][column] == 0 and merge == ["none","none"]:
+                        elif grid[search][column] == 0 and merge == [-1,-1]:
                             merge = [search,column]
                         elif grid[lign][column] != grid[search][column] and grid[search][column] != 0:
-                            merge = ["none","none"]
-                    if merge != ["none","none"]:
+                            merge = [-1,-1]
+                    if merge != [-1,-1]:
                         if grid[merge[0]][merge[1]] != 0:
                             alreadymerge.append(merge)  
                         grid[merge[0]][merge[1]] = grid[merge[0]][merge[1]] + grid[lign][column]
