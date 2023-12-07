@@ -83,9 +83,10 @@ def CheckEnding(grid,win_or_loose):
     if win_or_loose == 'Loose':
         if len(GetAvailableTiles(grid)) == 0:
             if Checkmerge(grid) == True:
-                return False
-            return True
+                return True
+            return False
         return False
+    
     if win_or_loose == 'Win':
         for lign in grid:
             for column in lign:
@@ -116,143 +117,104 @@ def Addnum(grid:list[list[str]],empty_tiles: int) -> list[list[str]]:
     
 
 def Checkmerge(grid:list[list[str]]) -> tuple[int,int]:
-
-    for lign in range(4):
-        for column in range(4):
-            if grid[lign][column] != 0:
-                merge = ["none","none"]
-                for search in range(column):
-                    if grid[lign][column] == grid[lign][search]:
-                        merge = [lign,search]
-                    elif grid[lign][search] == 0 and merge == ["none","none"]:
-                        merge = [lign,search]
-                    elif grid[lign][column] != grid[lign][search] and grid[lign][search] != 0:
-                        merge = ["none","none"]
-                if merge != ["none","none"]:
-                    return True
-
-    for lign in range(4):
-        for column in range(3,-1,-1):
-            if grid[lign][column] != 0:
-                merge = ["none","none"]
-                for search in range(3,column,-1):
-                    if grid[lign][column] == grid[lign][search]:
-                        merge = [lign,search]
-                    elif grid[lign][search] == 0 and merge == ["none","none"]:
-                        merge = [lign,search]
-                    elif grid[lign][column] != grid[lign][search] and grid[lign][search] != 0:
-                            merge = ["none","none"]
-                if merge != ["none","none"]:
-                    return True
-            
-    for column in range(4):
-        for lign in range(4):
-            if grid[lign][column] != 0:
-                merge = ["none","none"]
-                for search in range(lign):
-                    if grid[lign][column] == grid[search][column]:
-                        merge = [search,column]
-                    elif grid[search][column] == 0 and merge == ["none","none"]:
-                        merge = [search,column]
-                    elif grid[lign][column] != grid[search][column] and grid[search][column] != 0:
-                        merge = ["none","none"]
-                if merge != ["none","none"]:
-                    return True
-
-    for column in range(4):
-        for lign in range(3,-1,-1):
-            if grid[lign][column] != 0:
-                merge = ["none","none"]
-                for search in range(3,lign,-1):
-                    if grid[lign][column] == grid[search][column]:
-                        merge = [search,column]
-                    elif grid[search][column] == 0 and merge == ["none","none"]:
-                        merge = [search,column]
-                    elif grid[lign][column] != grid[search][column] and grid[search][column] != 0:
-                        merge = ["none","none"]
-                if merge != ["none","none"]:
-                    return True
+    for lign in range(len(grid)):
+        for column in range(len(grid)):
+            if column+1 < len(grid):
+                if grid[lign][column] == grid[lign][column+1]:
+                    return False
+            if lign+1 < len(grid):
+                if grid[lign][column] == grid[lign+1][column]:
+                    return False
     
-    return False
+    return True
 
 
 def  Moving(axis: str,grid: list[list[str]]) -> list[list[str]]:
+
     alreadymerge = []
+    
     if axis == "left":
         for lign in range(4):
+            start = 0
             for column in range(4):
-                if grid[lign][column] != 0:
-                    merge = [-1,-1]
-                    for search in range(column):
-                        if grid[lign][column] == grid[lign][search] and [lign,search] not in alreadymerge:
-                            merge = [lign,search]
-                        elif grid[lign][search] == 0 and merge == [-1,-1]:
-                            merge = [lign,search]
-                        elif grid[lign][column] != grid[lign][search] and grid[lign][search] != 0:
-                            merge = [-1,-1]
-                    if merge != [-1,-1]:
-                        if grid[merge[0]][merge[1]] != 0:
-                            alreadymerge.append(merge)
-                        grid[merge[0]][merge[1]] = grid[merge[0]][merge[1]] + grid[lign][column]
-                        grid[lign][column] = 0
-
-
+                if grid[lign][column] != 0 and column > 0:
+                    for search in range(start,column):
+                        if grid[lign][column] == grid[lign][search]:
+                            grid[lign][search] = grid[lign][column] + grid[lign][search]
+                            start = search + 1
+                            grid[lign][column] = 0
+                            break
+                        elif grid[lign][search] == 0:
+                            grid[lign][search] = grid[lign][column]
+                            grid[lign][column] = 0
+                            start = search
+                            break
+                        if search == column - 1:
+                            start +=1
+                
     elif axis == "right":
          for lign in range(4):
+            start = 3
             for column in range(3,-1,-1):
-                if grid[lign][column] != 0:
-                    merge = [-1,-1]
-                    for search in range(3,column,-1):
-                        if grid[lign][column] == grid[lign][search] and [lign,search] not in alreadymerge:
-                            merge = [lign,search]
-                        elif grid[lign][search] == 0 and merge == [-1,-1]:
-                            merge = [lign,search]
-                        elif grid[lign][column] != grid[lign][search] and grid[lign][search] != 0:
-                            merge = [-1,-1]
-                    if merge != [-1,-1]:
-                        if grid[merge[0]][merge[1]] != 0:
-                            alreadymerge.append(merge)
-                        grid[merge[0]][merge[1]] = grid[merge[0]][merge[1]] + grid[lign][column]
-                        grid[lign][column] = 0
+                if grid[lign][column] != 0 and column < 3:
+                    for search in range(start,column,-1):
+                        if grid[lign][column] == grid[lign][search]:
+                            grid[lign][search] = grid[lign][column] + grid[lign][search]
+                            start = search - 1
+                            grid[lign][column] = 0
+                            break
+                        elif grid[lign][search] == 0:
+                            grid[lign][search] = grid[lign][column]
+                            grid[lign][column] = 0
+                            start = search
+                            break
+                        if search == column+1:
+                            start -= 1
+
+                        
 
     
     elif axis == "up":
         for column in range(4):
+            start = 0
             for lign in range(4):
-                if grid[lign][column] != 0:
+                if grid[lign][column] != 0 and lign > 0:
                     merge = [-1,-1]
-                    for search in range(lign):
-                        if grid[lign][column] == grid[search][column] and [search,column] not in alreadymerge:
-                            merge = [search,column]
-                        elif grid[search][column] == 0 and merge == [-1,-1]:
-                            merge = [search,column]
-                        elif grid[lign][column] != grid[search][column] and grid[search][column] != 0:
-                            merge = [-1,-1]
-                    if merge != [-1,-1]:
-                        if grid[merge[0]][merge[1]] != 0:
-                            alreadymerge.append(merge)
-                        grid[merge[0]][merge[1]] = grid[merge[0]][merge[1]] + grid[lign][column]
-                        grid[lign][column] = 0
+                    for search in range(start,lign):
+                        if grid[lign][column] == grid[search][column]:
+                            grid[search][column] = grid[lign][column] + grid[search][column]
+                            start = search + 1
+                            grid[lign][column] = 0
+                            break
+                        elif grid[search][column] == 0:
+                            grid[search][column] = grid[lign][column]
+                            grid[lign][column] = 0
+                            start = search
+                            break
+                        if search == lign -1:
+                            start +=1
+
 
 
     elif axis == "down":    
         for column in range(4):
+            start = 3
             for lign in range(3,-1,-1):
-                if grid[lign][column] != 0:
+                if grid[lign][column] != 0 and lign < 3:
                     merge = [-1,-1]
-                    for search in range(3,lign,-1):
-                        if grid[lign][column] == grid[search][column] and [search,column] not in alreadymerge:
-                            merge = [search,column]
-                        elif grid[search][column] == 0 and merge == [-1,-1]:
-                            merge = [search,column]
-                        elif grid[lign][column] != grid[search][column] and grid[search][column] != 0:
-                            merge = [-1,-1]
-                    if merge != [-1,-1]:
-                        if grid[merge[0]][merge[1]] != 0:
-                            alreadymerge.append(merge)  
-                        grid[merge[0]][merge[1]] = grid[merge[0]][merge[1]] + grid[lign][column]
-                        grid[lign][column] = 0
-                          
+                    for search in range(start,lign,-1):
+                        if grid[lign][column] == grid[search][column]:
+                            grid[search][column] = grid[lign][column] + grid[search][column]
+                            start = search - 1
+                            grid[lign][column] = 0
+                            break
+                        elif grid[search][column] == 0:
+                            grid[search][column] = grid[lign][column]
+                            grid[lign][column] = 0
+                            start = search
+                            break
+                        if search == lign + 1:
+                            start -=1
 
     return grid
 
@@ -277,3 +239,6 @@ def Start(start : bool):
     print("Game Over")
 
 Start(True)
+
+
+
